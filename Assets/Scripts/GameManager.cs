@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,8 @@ public class GameManager : MonoBehaviour
     private GameObject[][] stickObjects;
     public GameObject[] rowButtons;
     public GameObject computerMoveButton;
+    public GameObject victoryPanel;
+    public GameObject defeatPanel;
     private int[] sticks;
     private bool playerHasToPlay;
     private int playerPlayedRow;
@@ -26,7 +29,7 @@ public class GameManager : MonoBehaviour
             sticksRow3,
             sticksRow4
         };
-        initGame();
+        restartGame();
     }
 
     public void removeStick(int row)
@@ -34,10 +37,7 @@ public class GameManager : MonoBehaviour
         if (playerHasToPlay)
         {
             playerHasToPlay = false;
-            foreach (GameObject btn in rowButtons)
-            {
-                btn.SetActive(true);
-            }
+            enableAvailablePlayRowButtons();
             playerPlayedRow = row;
             computerMoveButton.SetActive(true);
         }
@@ -51,25 +51,63 @@ public class GameManager : MonoBehaviour
             {
                 rowButtons[row].SetActive(false);
             }
+
+            // You loose, computer wins
+            if (sticks.All(x => x == 0))
+            {
+                defeatPanel.SetActive(true);
+                disableAllPlayButtons();
+            }
         }
+        print("Game state: " + sticks[0] + " - " + sticks[1] + " - " + sticks[2] + " - " + sticks[3]);
     }
 
     public void doComputerMove()
     {
+        // TODO: implement computer move
+
         playerHasToPlay = true;
+        enableAvailablePlayRowButtons();
+        computerMoveButton.SetActive(false);
+
+        // Computer looses, you win
+        if (sticks.All(x => x == 0))
+        {
+            defeatPanel.SetActive(true);
+            disableAllPlayButtons();
+        }
+    }
+
+    private void enableAvailablePlayRowButtons()
+    {
+        for (int i = 0; i < rowButtons.Length; i++)
+        {
+            if (sticks[i] > 0)
+            {
+                rowButtons[i].SetActive(true);
+            }
+        }
+    }
+
+    private void enableAllPlayButtons()
+    {
         foreach (GameObject btn in rowButtons)
         {
             btn.SetActive(true);
+        }
+        computerMoveButton.SetActive(true);
+    }
+
+    private void disableAllPlayButtons()
+    {
+        foreach (GameObject btn in rowButtons)
+        {
+            btn.SetActive(false);
         }
         computerMoveButton.SetActive(false);
     }
 
     public void restartGame()
-    {
-        initGame();
-    }
-
-    private void initGame()
     {
         playerHasToPlay = true;
         playerPlayedRow = -1;
@@ -81,10 +119,8 @@ public class GameManager : MonoBehaviour
                 obj.SetActive(true);
             }
         }
-        foreach (GameObject btn in rowButtons)
-        {
-            btn.SetActive(true);
-        }
-        computerMoveButton.SetActive(true);
+        enableAllPlayButtons();
+        victoryPanel.SetActive(false);
+        defeatPanel.SetActive(false);
     }
 }
