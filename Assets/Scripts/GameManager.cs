@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
         restartGame();
     }
 
-    public void removeStick(int row)
+    public void playerRemoveStick(int row)
     {
         if (playerHasToPlay)
         {
@@ -64,7 +64,19 @@ public class GameManager : MonoBehaviour
 
     public void doComputerMove()
     {
-        // TODO: implement computer move
+        int row, count;
+        (row, count) = MiniMaxSolver.getNextMove(sticks);
+
+        if (sticks[row] < count)
+        {
+            print("FATAL ERROR: solver returned count higher than sticks available!");
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            sticks[row]--;
+            stickObjects[row][sticks[row]].SetActive(false);
+        }
 
         playerHasToPlay = true;
         enableAvailablePlayRowButtons();
@@ -73,7 +85,7 @@ public class GameManager : MonoBehaviour
         // Computer looses, you win
         if (sticks.All(x => x == 0))
         {
-            defeatPanel.SetActive(true);
+            victoryPanel.SetActive(true);
             disableAllPlayButtons();
         }
     }
